@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/emincanozcan/insider-assessment/config"
+)
 
 func main() {
-  fmt.Println("ready!")
+	c, err := config.Load()
+	if err != nil {
+		panic("Missing environment variables!" + err.Error())
+	}
+	fmt.Println("ready!", c)
 }
