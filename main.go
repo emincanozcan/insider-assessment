@@ -3,11 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
 
 	"github.com/emincanozcan/insider-assessment/internal/config"
 	"github.com/emincanozcan/insider-assessment/internal/database"
 	"github.com/emincanozcan/insider-assessment/internal/database/sqlc"
 	"github.com/emincanozcan/insider-assessment/internal/redis"
+	"github.com/emincanozcan/insider-assessment/pkg/webhook_client"
+	"github.com/emincanozcan/insider-assessment/pkg/webhook_server"
 )
 
 func main() {
@@ -15,6 +19,23 @@ func main() {
 	if err != nil {
 		panic("Missing environment variables!" + err.Error())
 	}
+
+	if config.StartLocalWebhookServer {
+		go webhook_server.InitializeServer(config.LocalWebhookServerPort)
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	wc := webhook_client.NewClient(config.WebhookURL, config.WebhookAuthKey)
+	res, err := wc.Send("emincan@emincanozcan.com", "Reminder: interview")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(res)
+
+	select {}
+
+	return
+	os.Exit(1)
 
 	// MIGRATE
 	err = database.RunMigrations(config.DatabaseURL)
@@ -59,4 +80,7 @@ func main() {
 	}
 
 	fmt.Println("Redis:", val)
+}
+
+func runLocalWebhookServer() {
 }
