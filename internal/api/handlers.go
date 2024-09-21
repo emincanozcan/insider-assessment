@@ -28,6 +28,11 @@ func (h *Handler) GetSentMessages(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(messages)
 }
 
+func (h *Handler) AddTestMessages(w http.ResponseWriter, r *http.Request) {
+	h.messageService.AddTestMessages(r.Context())
+	w.Write([]byte("10 new messages added."))
+}
+
 func (h *Handler) StartProcessing(job *worker.MessageSendJob) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		job.Start()

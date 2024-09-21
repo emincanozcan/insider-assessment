@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/emincanozcan/insider-assessment/internal/service"
@@ -15,10 +14,13 @@ func InitializeApi(messageSendJob *worker.MessageSendJob, messageService *servic
 	router.HandleFunc("GET /api/message-sending/start", handler.StartProcessing(messageSendJob))
 	router.HandleFunc("GET /api/message-sending/stop", handler.StopProcessing(messageSendJob))
 
+	// NOTE: this route added for testing purposes, it adds 10 new dummy messages as unsent to the databaase.
+	router.HandleFunc("GET /api/add-test-messages", handler.AddTestMessages)
+
 	server := &http.Server{
 		Addr:    ":" + port,
 		Handler: router,
 	}
-	log.Println("App Server listening:" + port)
+
 	server.ListenAndServe()
 }

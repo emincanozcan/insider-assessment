@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"sync"
 	"time"
 
@@ -89,4 +90,13 @@ func (s *MessageService) GetSentMessages(ctx context.Context) ([]models.SentMess
 	}
 
 	return list, nil
+}
+
+func (s *MessageService) AddTestMessages(ctx context.Context) {
+	for i := 0; i < 10; i++ {
+		s.sqlcQueries.CreateMessage(ctx, sqlc.CreateMessageParams{
+			Content:   "Friendly reminder for your interview! " + strconv.Itoa(i),
+			Recipient: "emincan@emincanozcan.com",
+		})
+	}
 }

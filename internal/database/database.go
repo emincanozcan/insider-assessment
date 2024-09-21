@@ -40,3 +40,15 @@ func RunMigrations(databaseURL string) error {
 	}
 	return nil
 }
+
+func Initialize(databaseURL string) *sql.DB {
+	var err error
+	err = RunMigrations(databaseURL)
+	if err != nil {
+		panic("Cant run migrations" + err.Error())
+	}
+
+	db, err := NewDB(databaseURL)
+	return db
+}
+
