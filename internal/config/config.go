@@ -12,6 +12,8 @@ type Config struct {
 	WebhookAuthKey          string
 	StartLocalWebhookServer bool
 	LocalWebhookServerPort  string
+	MessageSendInterval     int
+	MessageSendBatchSize    int32
 }
 
 func Load() (*Config, error) {
@@ -30,5 +32,7 @@ func Load() (*Config, error) {
 		WebhookAuthKey:          viper.GetString("WEBHOOK_AUTH_KEY"),
 		StartLocalWebhookServer: viper.GetBool("START_LOCAL_WEBHOOK_SERVER"),
 		LocalWebhookServerPort:  viper.GetString("LOCAL_WEBHOOK_SERVER_PORT"),
+		MessageSendInterval:     viper.GetInt("MESSAGE_SEND_INTERVAL"),
+		MessageSendBatchSize:    viper.GetInt32("MESSAGE_SEND_BATCH_SIZE"),
 	}, nil
 }

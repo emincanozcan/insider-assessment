@@ -3,6 +3,19 @@ INSERT INTO messages (content, recipient, status)
 VALUES ($1, $2, $3)
 RETURNING *;
 
+-- name: GetPendingMessagesAndMarkAsSending :many
+WITH updated AS (
+  SELECT id
+  FROM messages
+  WHERE status = 0
+  ORDER BY id ASC
+  LIMIT $1
+)
+UPDATE messages
+SET status = 1
+WHERE id IN (SELECT id FROM updated)
+RETURNING *;
+
 -- name: GetMessageByID :one
 SELECT * FROM messages
 WHERE id = $1 LIMIT 1;

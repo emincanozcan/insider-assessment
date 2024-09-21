@@ -50,6 +50,48 @@ func (q *Queries) GetMessageByID(ctx context.Context, id int32) (Message, error)
 	return i, err
 }
 
+const getPendingMessagesAndMarkAsSending = `-- name: GetPendingMessagesAndMarkAsSending :many
+WITH updated AS (
+  SELECT id
+  FROM messages
+  WHERE status = 0
+  ORDER BY id ASC
+  LIMIT $1
+)
+UPDATE messages
+SET status = 1
+WHERE id IN (SELECT id FROM updated)
+RETURNING id, content, recipient, status
+`
+
+func (q *Queries) GetPendingMessagesAndMarkAsSending(ctx context.Context, limit int32) ([]Message, error) {
+	rows, err := q.db.QueryContext(ctx, getPendingMessagesAndMarkAsSending, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Message
+	for rows.Next() {
+		var i Message
+		if err := rows.Scan(
+			&i.ID,
+			&i.Content,
+			&i.Recipient,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listPendingMessages = `-- name: ListPendingMessages :many
 SELECT id, content, recipient, status FROM messages
 WHERE status = 0
