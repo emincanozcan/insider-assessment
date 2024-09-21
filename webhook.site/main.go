@@ -1,21 +1,27 @@
-package webhook_server
+package main
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/google/uuid"
 )
 
-func InitializeServer(port string) {
+func main() {
+	port := os.Getenv("PORT")
+	if len(port) == 0 {
+		panic("Port is required!")
+	}
+
 	router := http.NewServeMux()
 	router.HandleFunc("POST /api/receive-message", webhookHandler)
 	server := &http.Server{
 		Addr:    ":" + port,
 		Handler: router,
 	}
-	log.Println("Webhook Server: Listening...")
+  log.Println("Webhook Server: Listening on port: " + port)
 	server.ListenAndServe()
 }
 
@@ -37,14 +43,14 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Webhook Server: Received message to: %s, content: %s\n", req.To, req.Content)
+	log.Printf("Received message to: %s, content: %s\n", req.To, req.Content)
 
 	res := Response{
 		MessageId: uuid.New().String(),
 		Message:   "Accepted",
 	}
 
-	log.Printf("Webhook Server: Responding with MessageId: %s\n", res.MessageId)
+	log.Printf("Responding with MessageId: %s\n", res.MessageId)
 
 	w.WriteHeader(http.StatusAccepted)
 	w.Header().Set("Content-Type", "application/json")

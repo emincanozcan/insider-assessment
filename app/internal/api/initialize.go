@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/emincanozcan/insider-assessment/internal/service"
@@ -22,5 +23,6 @@ func InitializeApi(messageSendJob *worker.MessageSendJob, messageService *servic
 		Handler: router,
 	}
 
+	log.Println("App server listening on port: " + port)
 	server.ListenAndServe()
 }
