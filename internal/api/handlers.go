@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/emincanozcan/insider-assessment/internal/service"
+	"github.com/emincanozcan/insider-assessment/internal/worker"
 )
 
 type Handler struct {
@@ -25,4 +26,18 @@ func (h *Handler) GetSentMessages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(messages)
+}
+
+func (h *Handler) StartProcessing(job *worker.MessageSendJob) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		job.Start()
+		w.Write([]byte("Processing started."))
+	}
+}
+
+func (h *Handler) StopProcessing(job *worker.MessageSendJob) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		job.Stop()
+		w.Write([]byte("Processing stopped."))
+	}
 }
