@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/emincanozcan/insider-assessment/internal/api"
 	"github.com/emincanozcan/insider-assessment/internal/config"
 	"github.com/emincanozcan/insider-assessment/internal/database"
 	"github.com/emincanozcan/insider-assessment/internal/database/sqlc"
@@ -35,8 +36,8 @@ func main() {
 			panic("Can't connect to redis")
 		}
 		messageService := service.NewMessageService(queries, redis, webhook_client.NewClient(config.WebhookURL, config.WebhookAuthKey))
-		sendMessagesLoop(messageService, config.MessageSendInterval, config.MessageSendBatchSize)
-
+		go sendMessagesLoop(messageService, config.MessageSendInterval, config.MessageSendBatchSize)
+		api.InitializeApi(messageService, config.ServerPort)
 	case "webhookserver":
 		fmt.Println("Starting webhook server...")
 		webhook_server.InitializeServer(config.LocalWebhookServerPort)

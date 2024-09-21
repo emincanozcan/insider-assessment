@@ -71,3 +71,22 @@ func (s *MessageService) processMessage(ctx context.Context, msg *sqlc.Message) 
 
 	return nil
 }
+
+func (s *MessageService) GetSentMessages(ctx context.Context) ([]models.SentMessageResponseModel, error) {
+	lastMessages, err := s.sqlcQueries.ListSentMessages(ctx, 1000)
+	if err != nil {
+		return nil, err
+	}
+
+	list := []models.SentMessageResponseModel{}
+
+	for _, message := range lastMessages {
+		list = append(list, models.SentMessageResponseModel{
+			InternalId: int(message.ID),
+			Recipient:  message.Recipient,
+			Content:    message.Content,
+		})
+	}
+
+	return list, nil
+}
