@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/emincanozcan/insider-assessment/internal/config"
@@ -64,7 +65,7 @@ randomMessager      -> This adds random messages to the database in the backgrou
 func addSomeRandomMessages(queries *sqlc.Queries) {
 	for i := 0; i < 100; i++ {
 		queries.CreateMessage(context.Background(), sqlc.CreateMessageParams{
-			Content:   "Friendly reminder for your interview! " + string(i),
+			Content:   "Friendly reminder for your interview! " + strconv.Itoa(i),
 			Recipient: "emincan@emincanozcan.com",
 		})
 	}
