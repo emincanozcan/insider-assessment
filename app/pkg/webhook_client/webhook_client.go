@@ -36,7 +36,8 @@ func (c *Client) Send(to, content string) (*Response, error) {
 	}
 
 	jsonData, err := json.Marshal(req)
-	if err != nil { return nil, fmt.Errorf("failed to marshal request: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
 	httpReq, err := http.NewRequest("POST", c.URL, bytes.NewBuffer(jsonData))
@@ -54,8 +55,12 @@ func (c *Client) Send(to, content string) (*Response, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusAccepted {
+	/* if resp.StatusCode != http.StatusAccepted {
 		return nil, fmt.Errorf("unexpected status code: %d, was expecting %d", resp.StatusCode, http.StatusAccepted)
+	} */
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, fmt.Errorf("unexpected status code: %d, was expecting a value between 200 and 300", resp.StatusCode)
 	}
 
 	var response Response
