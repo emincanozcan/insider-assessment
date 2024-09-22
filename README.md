@@ -78,6 +78,42 @@ Message sending logic might look a bit complex, so this is the diagram(ish) draw
 
 ## Troubleshooting
 
+### Real Webhook.site Test
+
+This is the endpoint I have used to ensure that the system also works with a real webhook.site address:
+
+[https://webhook.site/d8465148-a1b4-4e27-812e-68a76d2500d0](https://webhook.site/d8465148-a1b4-4e27-812e-68a76d2500d0)
+
+Defined custom actions as below:
+
+1) To validate authorization header `x-ins-auth-key`, add a new `Condition` with the following settings:
+   - Input: `$request.header.x-ins-auth-key$`
+   - is equal to
+   - Value: insider-auth-key-123
+   - Then do following: Use result in other actions
+
+2) To return a successful response when the request has correct `x-ins-auth-key` header, add a new `Modify Response` with the following settings:
+   - Response Body:
+   ```json
+   {
+      "message": "Accepted",
+      "messageId": "$request.uuid$"
+   }
+   ```
+   - Send response and stop action execution: Checked
+   - Only run when condition passes: Action #1 (the one we created in the first step)
+
+
+3) To return an unauthorized response when the request has not correct `x-ins-auth-key` header, add a new `Modify Response` with the following settings:
+   - Response Body:
+   ```json
+   {
+      "message": "Unauthorized"
+   }
+   ```
+   - Status Code: 403
+   - Only run when condition passes: Always
+
 ### Port Issues
 
 By default, the docker compose file exposes:
