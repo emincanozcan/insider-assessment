@@ -69,6 +69,13 @@ The project includes the following API endpoints:
 
 5. Database migrataion manager: [golang-migrate](https://github.com/golang-migrate/migrate)
 
+## Message Sending Diagram
+
+Message sending logic might look a bit complex, so this is the diagram(ish) drawing that explains how it works:
+
+![Message sending](./art/message-sending.png)
+
+
 ## Troubleshooting
 
 ### Port Issues
