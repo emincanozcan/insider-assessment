@@ -28,9 +28,3 @@ LIMIT $1;
 UPDATE messages
 SET sent_at = NOW()
 WHERE id = $1;
-
--- name: MarkMessageAsNotSent :exec
-UPDATE messages
-SET sending_at = null, sent_at = NULL
-WHERE id = $1;
-

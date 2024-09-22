@@ -82,7 +82,7 @@ func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} models.MessageProcessingResponse
 // @Router /messages/processing/start [post]
 func (h *Handler) StartProcessing(w http.ResponseWriter, r *http.Request) {
-	worker.GetMessageSendJob().Start()
+	worker.GetMessageSendJob().Continue()
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(models.MessageProcessingResponse{
 		Message: "Message processing started.",

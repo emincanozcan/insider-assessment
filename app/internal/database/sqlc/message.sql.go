@@ -120,17 +120,6 @@ func (q *Queries) ListSentMessages(ctx context.Context, limit int32) ([]Message,
 	return items, nil
 }
 
-const markMessageAsNotSent = `-- name: MarkMessageAsNotSent :exec
-UPDATE messages
-SET sending_at = null, sent_at = NULL
-WHERE id = $1
-`
-
-func (q *Queries) MarkMessageAsNotSent(ctx context.Context, id int32) error {
-	_, err := q.db.ExecContext(ctx, markMessageAsNotSent, id)
-	return err
-}
-
 const markMessageAsSent = `-- name: MarkMessageAsSent :exec
 UPDATE messages
 SET sent_at = NOW()

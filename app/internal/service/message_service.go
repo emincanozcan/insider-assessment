@@ -54,8 +54,6 @@ func (s *MessageService) processMessage(ctx context.Context, msg *sqlc.Message) 
 	res, err := s.webhookClient.Send(msg.Recipient, msg.Content)
 
 	if err != nil {
-		log.Printf("Main server: Error in http send request, rollback result to resend it in the future. " + err.Error())
-		s.sqlcQueries.MarkMessageAsNotSent(ctx, msg.ID)
 		return fmt.Errorf("failed to send message: %w", err)
 	}
 
@@ -64,9 +62,6 @@ func (s *MessageService) processMessage(ctx context.Context, msg *sqlc.Message) 
 		return fmt.Errorf("failed to update message status to sent: %w", err)
 	}
 	s.redisClient.Set(ctx, "message:sent:"+res.MessageID, time.Now().UTC().UnixMilli(), time.Duration(30*24)*time.Hour)
-	if err != nil {
-		log.Println("failed to store in redis: " + err.Error())
-	}
 	return nil
 }
 
