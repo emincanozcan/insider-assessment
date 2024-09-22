@@ -2,6 +2,19 @@
 
 This project implements an automatic message sending system based on the given requirements.
 
+# Table of contents
+
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+  - [Endpoints](#endpoints)
+- [Technologies Used](#technologies-used)
+- [Message Sending Diagram](#message-sending-diagram)
+- [Troubleshooting](#troubleshooting)
+  - [Real Webhook.site Test](#real-webhooksite-test)
+  - [Port Issues](#port-issues)
+
 ## Getting Started
 
 ### Prerequisites
@@ -117,6 +130,8 @@ Defined custom actions as below:
    ```
    - Status Code: 403
    - Only run when condition passes: Always
+
+4) Update the `WEBHOOK_URL` environment variable in the docker-compose.yaml file. Refer to the Configuration section for details.
 
 ### Port Issues
 
