@@ -1,0 +1,78 @@
+definitions:
+  models.SentMessageResponseModel:
+    properties:
+      content:
+        type: string
+      id:
+        type: integer
+      recipient:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /messages/add-test:
+    post:
+      description: Add 10 test messages to the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add test messages
+      tags:
+      - messages
+  /messages/processing/start:
+    post:
+      description: Start the message sending job
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Start message processing
+      tags:
+      - processing
+  /messages/processing/stop:
+    post:
+      description: Stop the message sending job
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Stop message processing
+      tags:
+      - processing
+  /messages/sent:
+    get:
+      description: Retrieve all sent messages
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.SentMessageResponseModel'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get sent messages
+      tags:
+      - messages
+swagger: "2.0"

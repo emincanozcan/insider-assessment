@@ -90,9 +90,10 @@ func (s *MessageService) GetSentMessages(ctx context.Context) ([]models.SentMess
 }
 
 func (s *MessageService) AddTestMessages(ctx context.Context) {
+	now := time.Now().UTC().String()
 	for i := 0; i < 10; i++ {
 		s.sqlcQueries.CreateMessage(ctx, sqlc.CreateMessageParams{
-			Content:   "Friendly reminder for your interview! " + strconv.Itoa(i),
+			Content:   "Some random message, created at: " + now + "idx:" + strconv.Itoa(i),
 			Recipient: "emincan@emincanozcan.com",
 		})
 	}
