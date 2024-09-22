@@ -13,8 +13,8 @@ This project implements an automatic message sending system based on the given r
 
 1. Clone the repository:
    ```bash
-   git clone github.com/emincanozcan/insider-assesment
-   cd insider-assesment
+   git clone github.com/emincanozcan/insider-assessment
+   cd insider-assessment
    ```
 
 2. Start the services using docker compose:
@@ -67,7 +67,7 @@ The project includes the following API endpoints:
 
 By default, the docker compose file exposes:
 
-- port 8080 for the assesment project
+- port 8080 for the assessment project
 - port 8081 for the webhook.site imitation server
 - port 5432 for postgresql
 - port 6379 for redis
