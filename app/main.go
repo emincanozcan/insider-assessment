@@ -19,16 +19,22 @@ func main() {
 		panic("Missing environment variables!" + err.Error())
 	}
 
-	queries := sqlc.New(database.Initialize(config.DatabaseURL))
+	db, err := database.Initialize(config.DatabaseURL)
+	if err != nil {
+		panic("Can't connect to database!" + err.Error())
+	}
+
+	queries := sqlc.New(db)
 
 	redis, err := redis.Connect(config.RedisURL)
 	if err != nil {
-		panic("Can't connect to redis")
+		panic("Can't connect to redis" + err.Error())
 	}
 
 	messageService := service.NewMessageService(queries, redis, webhook_client.NewClient(config.WebhookURL, config.WebhookAuthKey))
 
 	messageSender := worker.MakeOrGet(messageService, time.Duration(config.MessageSendInterval)*time.Second, config.MessageSendBatchSize)
+	messageSender.Start()
 	go messageSender.StartBackgroundJob()
 
 	api.InitializeApi(messageSender, messageService, config.Port)

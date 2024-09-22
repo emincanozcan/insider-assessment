@@ -27,7 +27,7 @@ func NewDB(databaseURL string) (*sql.DB, error) {
 func RunMigrations(databaseURL string) error {
 	dbConn, err := NewDB(databaseURL)
 	if err != nil {
-		panic("Failed to connect to database: " + err.Error())
+		return fmt.Errorf("Failed to connect dataaabase: " + err.Error())
 	}
 	defer dbConn.Close()
 	driver, err := postgres.WithInstance(dbConn, &postgres.Config{})
@@ -41,14 +41,13 @@ func RunMigrations(databaseURL string) error {
 	return nil
 }
 
-func Initialize(databaseURL string) *sql.DB {
+func Initialize(databaseURL string) (*sql.DB, error) {
 	var err error
 	err = RunMigrations(databaseURL)
 	if err != nil {
-		panic("Cant run migrations" + err.Error())
+		return nil, fmt.Errorf("Failed initialize database: " + err.Error())
 	}
 
 	db, err := NewDB(databaseURL)
-	return db
+	return db, err
 }
-

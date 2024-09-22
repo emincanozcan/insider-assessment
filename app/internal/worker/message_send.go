@@ -37,6 +37,9 @@ func (job *MessageSendJob) StartBackgroundJob() {
 	}
 	job.backgroundJobStarted = true
 
+	// first run
+	job.svc.SendPendingMessages(context.Background(), job.batchSize)
+
 	ticker := time.NewTicker(job.interval)
 	defer ticker.Stop()
 	for range ticker.C {

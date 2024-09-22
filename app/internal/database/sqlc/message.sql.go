@@ -10,42 +10,27 @@ import (
 )
 
 const createMessage = `-- name: CreateMessage :one
-INSERT INTO messages (content, recipient, status)
-VALUES ($1, $2, $3)
-RETURNING id, content, recipient, status
+INSERT INTO messages (content, recipient)
+VALUES ($1, $2)
+RETURNING id, content, recipient, tries, created_at, sending_at, sent_at
 `
 
 type CreateMessageParams struct {
 	Content   string
 	Recipient string
-	Status    int32
 }
 
 func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (Message, error) {
-	row := q.db.QueryRowContext(ctx, createMessage, arg.Content, arg.Recipient, arg.Status)
+	row := q.db.QueryRowContext(ctx, createMessage, arg.Content, arg.Recipient)
 	var i Message
 	err := row.Scan(
 		&i.ID,
 		&i.Content,
 		&i.Recipient,
-		&i.Status,
-	)
-	return i, err
-}
-
-const getMessageByID = `-- name: GetMessageByID :one
-SELECT id, content, recipient, status FROM messages
-WHERE id = $1 LIMIT 1
-`
-
-func (q *Queries) GetMessageByID(ctx context.Context, id int32) (Message, error) {
-	row := q.db.QueryRowContext(ctx, getMessageByID, id)
-	var i Message
-	err := row.Scan(
-		&i.ID,
-		&i.Content,
-		&i.Recipient,
-		&i.Status,
+		&i.Tries,
+		&i.CreatedAt,
+		&i.SendingAt,
+		&i.SentAt,
 	)
 	return i, err
 }
@@ -54,14 +39,13 @@ const getPendingMessagesAndMarkAsSending = `-- name: GetPendingMessagesAndMarkAs
 WITH updated AS (
   SELECT id
   FROM messages
-  WHERE status = 0
-  ORDER BY id ASC
+  WHERE ((sending_at IS NULL OR sending_at < NOW() - INTERVAL '1 hour') AND tries < 3)
+  ORDER BY created_at ASC 
   LIMIT $1
-)
-UPDATE messages
-SET status = 1
+) UPDATE messages
+SET sending_at = NOW(), tries = tries + 1
 WHERE id IN (SELECT id FROM updated)
-RETURNING id, content, recipient, status
+RETURNING id, content, recipient, tries, created_at, sending_at, sent_at
 `
 
 func (q *Queries) GetPendingMessagesAndMarkAsSending(ctx context.Context, limit int32) ([]Message, error) {
@@ -77,77 +61,10 @@ func (q *Queries) GetPendingMessagesAndMarkAsSending(ctx context.Context, limit 
 			&i.ID,
 			&i.Content,
 			&i.Recipient,
-			&i.Status,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listPendingMessages = `-- name: ListPendingMessages :many
-SELECT id, content, recipient, status FROM messages
-WHERE status = 0
-ORDER BY id
-LIMIT $1
-`
-
-func (q *Queries) ListPendingMessages(ctx context.Context, limit int32) ([]Message, error) {
-	rows, err := q.db.QueryContext(ctx, listPendingMessages, limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Message
-	for rows.Next() {
-		var i Message
-		if err := rows.Scan(
-			&i.ID,
-			&i.Content,
-			&i.Recipient,
-			&i.Status,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listProcessingMessages = `-- name: ListProcessingMessages :many
-SELECT id, content, recipient, status FROM messages
-WHERE status = 1
-ORDER BY id DESC
-LIMIT $1
-`
-
-func (q *Queries) ListProcessingMessages(ctx context.Context, limit int32) ([]Message, error) {
-	rows, err := q.db.QueryContext(ctx, listProcessingMessages, limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Message
-	for rows.Next() {
-		var i Message
-		if err := rows.Scan(
-			&i.ID,
-			&i.Content,
-			&i.Recipient,
-			&i.Status,
+			&i.Tries,
+			&i.CreatedAt,
+			&i.SendingAt,
+			&i.SentAt,
 		); err != nil {
 			return nil, err
 		}
@@ -163,9 +80,9 @@ func (q *Queries) ListProcessingMessages(ctx context.Context, limit int32) ([]Me
 }
 
 const listSentMessages = `-- name: ListSentMessages :many
-SELECT id, content, recipient, status FROM messages
-WHERE status = 2
-ORDER BY id DESC
+SELECT id, content, recipient, tries, created_at, sending_at, sent_at FROM messages
+WHERE sent_at IS NOT NULL
+ORDER BY sent_at DESC
 LIMIT $1
 `
 
@@ -182,7 +99,10 @@ func (q *Queries) ListSentMessages(ctx context.Context, limit int32) ([]Message,
 			&i.ID,
 			&i.Content,
 			&i.Recipient,
-			&i.Status,
+			&i.Tries,
+			&i.CreatedAt,
+			&i.SendingAt,
+			&i.SentAt,
 		); err != nil {
 			return nil, err
 		}
@@ -197,18 +117,24 @@ func (q *Queries) ListSentMessages(ctx context.Context, limit int32) ([]Message,
 	return items, nil
 }
 
-const updateMessageStatus = `-- name: UpdateMessageStatus :exec
+const markMessageAsNotSent = `-- name: MarkMessageAsNotSent :exec
 UPDATE messages
-SET status = $2
+SET sending_at = null, sent_at = NULL
 WHERE id = $1
 `
 
-type UpdateMessageStatusParams struct {
-	ID     int32
-	Status int32
+func (q *Queries) MarkMessageAsNotSent(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, markMessageAsNotSent, id)
+	return err
 }
 
-func (q *Queries) UpdateMessageStatus(ctx context.Context, arg UpdateMessageStatusParams) error {
-	_, err := q.db.ExecContext(ctx, updateMessageStatus, arg.ID, arg.Status)
+const markMessageAsSent = `-- name: MarkMessageAsSent :exec
+UPDATE messages
+SET sent_at = NOW()
+WHERE id = $1
+`
+
+func (q *Queries) MarkMessageAsSent(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, markMessageAsSent, id)
 	return err
 }

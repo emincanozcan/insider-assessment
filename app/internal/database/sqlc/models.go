@@ -4,9 +4,17 @@
 
 package sqlc
 
+import (
+	"database/sql"
+	"time"
+)
+
 type Message struct {
 	ID        int32
 	Content   string
 	Recipient string
-	Status    int32
+	Tries     int16
+	CreatedAt time.Time
+	SendingAt sql.NullTime
+	SentAt    sql.NullTime
 }

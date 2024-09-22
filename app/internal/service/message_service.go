@@ -29,6 +29,7 @@ func NewMessageService(queries *sqlc.Queries, redisClient *redis.Client, webhook
 }
 
 func (s *MessageService) SendPendingMessages(ctx context.Context, maxSize int32) {
+	log.Println("Message sending to the webhook service started at: " + time.Now().String())
 	messages, err := s.sqlcQueries.GetPendingMessagesAndMarkAsSending(ctx, maxSize)
 	if err != nil {
 		fmt.Printf("failed to get pending messages: %s", err.Error())
@@ -49,27 +50,23 @@ func (s *MessageService) SendPendingMessages(ctx context.Context, maxSize int32)
 }
 
 func (s *MessageService) processMessage(ctx context.Context, msg *sqlc.Message) error {
-	log.Printf("Main Server: Processing message id: %d, to: %s, content: %s\n", msg.ID, msg.Recipient, msg.Content)
+	log.Printf("Processing message id: %d, to: %s, content: %s\n", msg.ID, msg.Recipient, msg.Content)
 	res, err := s.webhookClient.Send(msg.Recipient, msg.Content)
 
 	if err != nil {
 		log.Printf("Main server: Error in http send request, rollback result to resend it in the future. " + err.Error())
-		_ = s.sqlcQueries.UpdateMessageStatus(ctx, sqlc.UpdateMessageStatusParams{
-			ID:     msg.ID,
-			Status: int32(models.MessageStatusPending),
-		})
+		s.sqlcQueries.MarkMessageAsNotSent(ctx, msg.ID)
 		return fmt.Errorf("failed to send message: %w", err)
 	}
 
-	err = s.sqlcQueries.UpdateMessageStatus(ctx, sqlc.UpdateMessageStatusParams{
-		ID:     msg.ID,
-		Status: int32(models.MessageStatusSent),
-	})
-	s.redisClient.Set(ctx, "message:sent:"+res.MessageID, time.Now().UTC().UnixMilli(), time.Duration(30*24)*time.Hour)
+	err = s.sqlcQueries.MarkMessageAsSent(ctx, msg.ID)
 	if err != nil {
 		return fmt.Errorf("failed to update message status to sent: %w", err)
 	}
-
+	s.redisClient.Set(ctx, "message:sent:"+res.MessageID, time.Now().UTC().UnixMilli(), time.Duration(30*24)*time.Hour)
+	if err != nil {
+		log.Println("failed to store in redis: " + err.Error())
+	}
 	return nil
 }
 
