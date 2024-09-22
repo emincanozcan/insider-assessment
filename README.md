@@ -21,7 +21,9 @@ This project implements an automatic message sending system based on the given r
     ```bash
     docker compose up
     ```
-This will start all the necessary services, including a custom webhook.site imitation server.
+   This will start all the necessary services, including a custom webhook.site imitation server.
+
+3. Go to [localhost:8080/swagger](http://localhost:8080/swagger) to get started.
 
 ### Configuration
 
@@ -32,9 +34,9 @@ Configuration parameters can be updated within the environment section of the `d
 - `WEBHOOK_URL`             URL to send the messages. By default, this is set to the webhook imitation server. It can also be set to an external URL like `https://webhook.site/bla-bla`.
 - `WEBHOOK_AUTH_KEY`        Value of the `x-ins-auth-key` header.
 
-### API Endpoints
+### Endpoints
 
-The project includes the following API endpoints:
+The project includes the following endpoints:
 
 1. `GET /swagger/index.html#`
 
@@ -68,6 +70,8 @@ The project includes the following API endpoints:
 4. Database query generator: [sqlc](https://github.com/sqlc-dev/sqlc), specifically [sqlc-gen-go](https://github.com/sqlc-dev/sqlc-gen-go)
 
 5. Database migrataion manager: [golang-migrate](https://github.com/golang-migrate/migrate)
+
+6. API Documentation: Swagger - [swaggo/swag](https://github.com/swaggo/swag)
 
 ## Message Sending Diagram
 
