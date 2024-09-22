@@ -13,7 +13,7 @@ This project implements an automatic message sending system based on the given r
 
 1. Clone the repository:
    ```bash
-   git clone github.com/emincanozcan/insider-assessment
+   git clone git@github.com:emincanozcan/insider-assessment.git
    cd insider-assessment
    ```
 
