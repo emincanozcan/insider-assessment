@@ -89,6 +89,24 @@ func (s *MessageService) GetSentMessages(ctx context.Context) ([]models.SentMess
 	return list, nil
 }
 
+func (s *MessageService) Create(ctx context.Context, req *models.AddMessageRequest) (*models.AddMessageResponse, error) {
+	req.Trim()
+	err := req.Validate()
+	if err != nil {
+		return nil, err
+	}
+
+	msg, err := s.sqlcQueries.CreateMessage(ctx, sqlc.CreateMessageParams{
+		Content:   req.Content,
+		Recipient: req.Recipient,
+	})
+
+	return &models.AddMessageResponse{
+		ID:        int(msg.ID),
+		Recipient: msg.Recipient,
+		Content:   msg.Content,
+	}, nil
+}
 func (s *MessageService) AddTestMessages(ctx context.Context) {
 	now := time.Now().UTC().String()
 	for i := 0; i < 10; i++ {

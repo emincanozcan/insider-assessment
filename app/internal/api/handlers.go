@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/emincanozcan/insider-assessment/internal/models"
 	"github.com/emincanozcan/insider-assessment/internal/service"
 	"github.com/emincanozcan/insider-assessment/internal/worker"
 )
@@ -18,13 +19,13 @@ func NewHandler(messageService *service.MessageService) *Handler {
 	}
 }
 
-	// @Summary Get sent messages
-	// @Description Retrieve all sent messages
-	// @Tags messages
-	// @Produce json
-	// @Success 200 {array} models.SentMessageResponseModel
-	// @Failure 500 {string} string "Internal Server Error"
-	// @Router /messages/sent [get]
+// @Summary Get sent messages
+// @Description Retrieve all sent messages
+// @Tags messages
+// @Produce json
+// @Success 200 {array} models.SentMessageResponseModel
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /messages/sent [get]
 func (h *Handler) GetSentMessages(w http.ResponseWriter, r *http.Request) {
 	messages, err := h.messageService.GetSentMessages(r.Context())
 	if err != nil {
@@ -36,16 +37,44 @@ func (h *Handler) GetSentMessages(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(messages)
 }
 
-// @Summary Add test messages
-// @Description Add 10 test messages to the system
+// @Summary Create a new message
+// @Description Create a new message with content and recipient.
 // @Tags messages
 // @Produce json
-// @Success 200 {object} map[string]string
-// @Router /messages/add-test [post]
-func (h *Handler) AddTestMessages(w http.ResponseWriter, r *http.Request) {
-	h.messageService.AddTestMessages(r.Context())
+// @Param message body models.AddMessageRequest true "Message request payload"
+// @Success 200 {object} models.AddMessageResponse "Success response"
+// @Failure 400 {object} map[string]string "Bad request response"
+// @Router /messages [post]
+func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"message": "10 new messages added."})
+
+	var messageReq models.AddMessageRequest
+
+	err := json.NewDecoder(r.Body).Decode(&messageReq)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"status":  "error",
+			"message": "Invalid payload",
+			"error":   "The payload is not a valid json",
+		})
+		return
+	}
+
+	// NOTE: Service only return validation errors for this case.
+	msg, err := h.messageService.Create(r.Context(), &messageReq)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"status":  "error",
+			"message": "Invalid payload",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	json.NewEncoder(w).Encode(msg)
 }
 
 // @Summary Start message processing

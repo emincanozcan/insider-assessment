@@ -16,9 +16,9 @@ func InitializeApi(messageSendJob *worker.MessageSendJob, messageService *servic
 
 	router.HandleFunc("/swagger/", httpSwagger.WrapHandler)
 	router.HandleFunc("GET /messages/sent", handler.GetSentMessages)
+	router.HandleFunc("POST /messages", handler.CreateMessage)
 	router.HandleFunc("POST /messages/processing/start", handler.StartProcessing(messageSendJob))
 	router.HandleFunc("POST /messages/processing/stop", handler.StopProcessing(messageSendJob))
-	router.HandleFunc("POST /messages/add-test", handler.AddTestMessages) // NOTE: this route added for testing purposes, it adds 10 new dummy messages as unsent to the databaase.
 
 	server := &http.Server{
 		Addr:    ":" + port,

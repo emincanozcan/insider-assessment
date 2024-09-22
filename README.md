@@ -36,25 +36,25 @@ Configuration parameters can be updated within the environment section of the `d
 
 The project includes the following API endpoints:
 
-1. GET /swagger/index.html#
+1. `GET /swagger/index.html#`
 
-   Opens the Swagger UI. It's suggested to use this endpoint in a browser. The following endpoints can be tried out through this interface.
+   Opens the Swagger UI. It's suggested to use this endpoint in a browser. The endpoints below [2-5] can be tried out through this interface.
 
-2. GET /messages/sent
+2. `GET /messages/sent`
 
    Returns a list of all sent messages.
 
-3. POST /messages/processing/start
+3. `POST /messages`
+
+   Adds a new message to the system. Body parameters are recipient and content with max character limit validations.
+
+4. `POST /messages/processing/start`
 
    Starts the background service that sends unsent messages every 2 minutes.
 
-4. POST /messages/processing/stop
+5. `POST /messages/processing/stop`
 
    Stops the background message sending service.
-
-5. POST /messages/add-test
-
-   Adds 10 new unsent messages to the database for testing purposes.
 
 
 ## Technologies Used

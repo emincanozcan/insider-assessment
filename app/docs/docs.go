@@ -15,19 +15,36 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/messages/add-test": {
+        "/messages": {
             "post": {
-                "description": "Add 10 test messages to the system",
+                "description": "Create a new message with content and recipient.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "messages"
                 ],
-                "summary": "Add test messages",
+                "summary": "Create a new message",
+                "parameters": [
+                    {
+                        "description": "Message request payload",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AddMessageRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Success response",
+                        "schema": {
+                            "$ref": "#/definitions/models.AddMessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request response",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -115,6 +132,31 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.AddMessageRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.AddMessageResponse": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "recipient": {
+                    "type": "string"
+                }
+            }
+        },
         "models.SentMessageResponseModel": {
             "type": "object",
             "properties": {

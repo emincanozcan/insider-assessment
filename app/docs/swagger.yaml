@@ -1,4 +1,20 @@
 definitions:
+  models.AddMessageRequest:
+    properties:
+      content:
+        type: string
+      recipient:
+        type: string
+    type: object
+  models.AddMessageResponse:
+    properties:
+      content:
+        type: string
+      id:
+        type: integer
+      recipient:
+        type: string
+    type: object
   models.SentMessageResponseModel:
     properties:
       content:
@@ -11,19 +27,30 @@ definitions:
 info:
   contact: {}
 paths:
-  /messages/add-test:
+  /messages:
     post:
-      description: Add 10 test messages to the system
+      description: Create a new message with content and recipient.
+      parameters:
+      - description: Message request payload
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddMessageRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Success response
+          schema:
+            $ref: '#/definitions/models.AddMessageResponse'
+        "400":
+          description: Bad request response
           schema:
             additionalProperties:
               type: string
             type: object
-      summary: Add test messages
+      summary: Create a new message
       tags:
       - messages
   /messages/processing/start:
