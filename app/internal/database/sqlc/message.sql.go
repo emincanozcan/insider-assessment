@@ -39,7 +39,10 @@ const getPendingMessagesAndMarkAsSending = `-- name: GetPendingMessagesAndMarkAs
 WITH updated AS (
   SELECT id
   FROM messages
-  WHERE ((sending_at IS NULL OR sending_at < NOW() - INTERVAL '1 hour') AND tries < 3)
+  WHERE (
+    (sending_at IS NULL OR (sending_at < NOW() - INTERVAL '1 hour' AND sent_at IS NULL))
+    AND tries < 3
+  )
   ORDER BY created_at ASC 
   LIMIT $1
 ) UPDATE messages
