@@ -46,10 +46,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad request response",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.CreateMessageErrorResponse"
                         }
                     }
                 }
@@ -69,10 +66,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.MessageProcessingResponse"
                         }
                     }
                 }
@@ -92,10 +86,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.MessageProcessingResponse"
                         }
                     }
                 }
@@ -153,6 +144,25 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "recipient": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateMessageErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MessageProcessingResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
                     "type": "string"
                 }
             }

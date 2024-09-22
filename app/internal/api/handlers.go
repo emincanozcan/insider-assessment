@@ -43,7 +43,7 @@ func (h *Handler) GetSentMessages(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param message body models.AddMessageRequest true "Message request payload"
 // @Success 200 {object} models.AddMessageResponse "Success response"
-// @Failure 400 {object} map[string]string "Bad request response"
+// @Failure 400 {object} models.CreateMessageErrorResponse "Bad request response"
 // @Router /messages [post]
 func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -54,10 +54,9 @@ func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{
-			"status":  "error",
-			"message": "Invalid payload",
-			"error":   "The payload is not a valid json",
+		json.NewEncoder(w).Encode(&models.CreateMessageErrorResponse{
+			Message: "Invalid payload",
+			Error:   "The payload is not a valid json",
 		})
 		return
 	}
@@ -66,10 +65,9 @@ func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	msg, err := h.messageService.Create(r.Context(), &messageReq)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{
-			"status":  "error",
-			"message": "Invalid payload",
-			"error":   err.Error(),
+		json.NewEncoder(w).Encode(&models.CreateMessageErrorResponse{
+			Message: "Invalid payload",
+			Error:   err.Error(),
 		})
 		return
 	}
@@ -81,26 +79,26 @@ func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 // @Description Start the message sending job
 // @Tags processing
 // @Produce json
-// @Success 200 {object} map[string]string
+// @Success 200 {object} models.MessageProcessingResponse
 // @Router /messages/processing/start [post]
-func (h *Handler) StartProcessing(job *worker.MessageSendJob) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		job.Start()
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"message": "Processing started"})
-	}
+func (h *Handler) StartProcessing(w http.ResponseWriter, r *http.Request) {
+	worker.GetMessageSendJob().Start()
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(models.MessageProcessingResponse{
+		Message: "Message processing started.",
+	})
 }
 
 // @Summary Stop message processing
 // @Description Stop the message sending job
 // @Tags processing
 // @Produce json
-// @Success 200 {object} map[string]string
+// @Success 200 {object} models.MessageProcessingResponse
 // @Router /messages/processing/stop [post]
-func (h *Handler) StopProcessing(job *worker.MessageSendJob) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		job.Stop()
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"message": "Processing stopped"})
-	}
+func (h *Handler) StopProcessing(w http.ResponseWriter, r *http.Request) {
+	worker.GetMessageSendJob().Stop()
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(models.MessageProcessingResponse{
+		Message: "Message processing stopped.",
+	})
 }

@@ -33,8 +33,7 @@ func main() {
 
 	messageService := service.NewMessageService(queries, redis, webhook_client.NewClient(config.WebhookURL, config.WebhookAuthKey))
 
-	messageSender := worker.MakeOrGet(messageService, time.Duration(config.MessageSendInterval)*time.Second, config.MessageSendBatchSize)
-	messageSender.Start()
+	messageSender := worker.InitMessageSendJob(messageService, time.Duration(config.MessageSendInterval)*time.Second, config.MessageSendBatchSize)
 	go messageSender.StartBackgroundJob()
 
 	api.InitializeApi(messageSender, messageService, config.Port)

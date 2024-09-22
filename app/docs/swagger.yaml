@@ -15,6 +15,18 @@ definitions:
       recipient:
         type: string
     type: object
+  models.CreateMessageErrorResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+  models.MessageProcessingResponse:
+    properties:
+      message:
+        type: string
+    type: object
   models.SentMessageResponseModel:
     properties:
       content:
@@ -47,9 +59,7 @@ paths:
         "400":
           description: Bad request response
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.CreateMessageErrorResponse'
       summary: Create a new message
       tags:
       - messages
@@ -62,9 +72,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.MessageProcessingResponse'
       summary: Start message processing
       tags:
       - processing
@@ -77,9 +85,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.MessageProcessingResponse'
       summary: Stop message processing
       tags:
       - processing

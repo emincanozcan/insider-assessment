@@ -17,8 +17,8 @@ func InitializeApi(messageSendJob *worker.MessageSendJob, messageService *servic
 	router.HandleFunc("/swagger/", httpSwagger.WrapHandler)
 	router.HandleFunc("GET /messages/sent", handler.GetSentMessages)
 	router.HandleFunc("POST /messages", handler.CreateMessage)
-	router.HandleFunc("POST /messages/processing/start", handler.StartProcessing(messageSendJob))
-	router.HandleFunc("POST /messages/processing/stop", handler.StopProcessing(messageSendJob))
+	router.HandleFunc("POST /messages/processing/start", handler.StartProcessing)
+	router.HandleFunc("POST /messages/processing/stop", handler.StopProcessing)
 
 	server := &http.Server{
 		Addr:    ":" + port,

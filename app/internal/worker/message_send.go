@@ -3,24 +3,26 @@ package worker
 import (
 	"context"
 	"time"
+
 	"github.com/emincanozcan/insider-assessment/internal/service"
 )
 
 type MessageSendJob struct {
-	backgroundJobStarted bool
-	running              bool
-	svc                  *service.MessageService
-	interval             time.Duration
-	batchSize            int32
+	svc       *service.MessageService
+	interval  time.Duration
+	batchSize int32
+	ticker    *time.Ticker
 }
 
 var singletonInstance *MessageSendJob = nil
 
-func MakeOrGet(svc *service.MessageService, interval time.Duration, batchSize int32) *MessageSendJob {
+func GetMessageSendJob() *MessageSendJob {
+	return singletonInstance
+}
+
+func InitMessageSendJob(svc *service.MessageService, interval time.Duration, batchSize int32) *MessageSendJob {
 	if singletonInstance == nil {
-		// this is not 100% safe, but should be okay for our use case.
 		singletonInstance = &MessageSendJob{
-			running:   true,
 			svc:       svc,
 			interval:  interval,
 			batchSize: batchSize,
@@ -31,30 +33,28 @@ func MakeOrGet(svc *service.MessageService, interval time.Duration, batchSize in
 }
 
 func (job *MessageSendJob) StartBackgroundJob() {
-	if job.backgroundJobStarted {
-		// already started ignore
-		return
-	}
-	job.backgroundJobStarted = true
-
-	// first run
 	job.svc.SendPendingMessages(context.Background(), job.batchSize)
+	job.ticker = time.NewTicker(job.interval)
+	go job.run()
+}
 
-	ticker := time.NewTicker(job.interval)
-	defer ticker.Stop()
-	for range ticker.C {
-		if !job.running {
-			continue
-		}
-
+func (job *MessageSendJob) run() {
+	for range job.ticker.C {
 		job.svc.SendPendingMessages(context.Background(), job.batchSize)
 	}
 }
 
 func (job *MessageSendJob) Start() {
-	job.running = true
+	if job.ticker == nil {
+		job.svc.SendPendingMessages(context.Background(), job.batchSize)
+		job.ticker = time.NewTicker(job.interval)
+		go job.run()
+	}
 }
 
 func (job *MessageSendJob) Stop() {
-	job.running = false
+	if job.ticker != nil {
+		job.ticker.Stop()
+		job.ticker = nil
+	}
 }
