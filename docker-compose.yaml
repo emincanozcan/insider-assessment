@@ -1,6 +1,7 @@
 services:
   app:
     image: insider-assesment-app
+    pull_policy: build
     build: 
       context: app/
     ports:
@@ -21,6 +22,7 @@ services:
 
   webhook:
     image: insider-assesment-webhook.site-simulator
+    pull_policy: build
     build: 
       context: webhook.site/
     ports:
