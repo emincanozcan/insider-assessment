@@ -9,8 +9,8 @@ services:
       - PORT=8080
       - DATABASE_URL=postgres://devuser:devpassword@db:5432/devdb?sslmode=disable
       - REDIS_URL=redis://redis:6379
-      - MESSAGE_SEND_INTERVAL=5 
-      - MESSAGE_SEND_BATCH_SIZE=1
+      - MESSAGE_SEND_INTERVAL=120 # 2 minutes 
+      - MESSAGE_SEND_BATCH_SIZE=2 # 2 records
       - WEBHOOK_URL=http://webhook:8081/api/receive-message
       - WEBHOOK_AUTH_KEY=insider-auth-key-123
     depends_on:
