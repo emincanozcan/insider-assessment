@@ -27,10 +27,10 @@ This will start all the necessary services, including a custom webhook.site imit
 
 Configuration parameters can be updated within the environment section of the `docker-compose.yml` file.
 
-- `MESSAGE_SEND_INTERVAL`   # Message sending interval in seconds (e.g., 120 to send messages every 2 minutes).
-- `MESSAGE_SEND_BATCH_SIZE` # Number of messages in each sending batch (e.g., 2 to send 2 messages in every interval).
-- `WEBHOOK_URL`             # URL to send the messages. By default, this is set to the webhook imitation server. It can also be set to an external URL like `https://webhook.site/bla-bla`.
-- `WEBHOOK_AUTH_KEY`        # Value of the `x-ins-auth-key` header.
+- `MESSAGE_SEND_INTERVAL`   Message sending interval in seconds (e.g., 120 to send messages every 2 minutes).
+- `MESSAGE_SEND_BATCH_SIZE` Number of messages in each sending batch (e.g., 2 to send 2 messages in every interval).
+- `WEBHOOK_URL`             URL to send the messages. By default, this is set to the webhook imitation server. It can also be set to an external URL like `https://webhook.site/bla-bla`.
+- `WEBHOOK_AUTH_KEY`        Value of the `x-ins-auth-key` header.
 
 ### API Endpoints
 
